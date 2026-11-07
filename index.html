@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diva Française</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#1B1610;      /* чёрное одеяние влюблённого */
+  --black2:#2A231A;
+  --gold:#C9A23A;       /* сусальное золото */
+  --gold-hi:#F1D77E;
+  --gold-lo:#7A5A12;
+  --pearl:#F3E9D2;      /* жемчужный фон карточек */
+  --pearl2:#E6D7B4;
+  --meadow:#3E5B2E;     /* цветочный луг */
+  --poppy:#B8412E;
+  --cornflower:#3B5BA5;
+  --violet:#6B4C8A;
+  --rose:#B15C7A;
+  --ink:#2A2117;
+  --serif:"Cormorant Garamond", "Times New Roman", Georgia, serif;
+  --sans:"Jost", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:var(--sans);color:var(--pearl);background:var(--black);
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(circle at 12% 30%, rgba(201,162,58,.07) 0 2px, transparent 3px),
+    radial-gradient(circle at 70% 75%, rgba(201,162,58,.05) 0 2px, transparent 3px);
+  background-size:46px 46px, 62px 62px;
+}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid var(--gold-hi);outline-offset:3px}
+#app{max-width:520px;margin:0 auto;min-height:100%}
+
+/* ---------- золотой лист ---------- */
+.leaf{
+  position:relative;overflow:hidden;
+  background:
+    radial-gradient(120% 80% at 18% 8%, rgba(246,224,140,.9) 0%, transparent 55%),
+    radial-gradient(90% 70% at 88% 85%, rgba(140,100,24,.85) 0%, transparent 60%),
+    linear-gradient(135deg,#D9B04A 0%,#B8892A 40%,#E3C062 68%,#9C7419 100%);
+}
+.leaf::after{
+  content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.35;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .4 0 0 0 0 .1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.leaf > svg.mosaic{position:absolute;inset:0;width:100%;height:100%}
+
+/* ---------- главная ---------- */
+.hero{padding:26px 20px 22px;border-bottom:3px solid var(--black)}
+.plaque{
+  position:relative;z-index:2;display:inline-block;background:var(--black);
+  padding:14px 20px 12px;border:1px solid var(--gold-lo);
+  box-shadow:6px 6px 0 rgba(27,22,16,.35);
+}
+.plaque h1{
+  font-family:var(--serif);font-style:italic;font-weight:600;font-size:40px;line-height:1;
+  background:linear-gradient(100deg,var(--gold-hi),var(--gold) 45%,#F6E39A 60%,var(--gold) 80%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.plaque p{font-size:13px;color:var(--pearl2);margin-top:6px;letter-spacing:.02em}
+.stats{position:relative;z-index:2;display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.chip{
+  background:rgba(27,22,16,.88);color:var(--pearl);border:1px solid var(--gold-lo);
+  padding:8px 12px;font-size:14px;display:flex;align-items:center;gap:8px;
+}
+.chip b{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--gold-hi)}
+.goal{flex:1;min-width:150px}
+.goal .bar{flex:1;height:6px;background:#3a3125;position:relative}
+.goal .bar i{position:absolute;inset:0 auto 0 0;background:var(--gold);transition:width .5s}
+
+.path{padding:8px 18px 40px}
+.unit{margin-top:34px}
+.unit-head{display:flex;gap:14px;align-items:flex-start}
+.unit-num{
+  flex:none;width:44px;height:58px;display:grid;place-items:center;
+  font-family:var(--serif);font-size:30px;font-weight:700;color:var(--black);
+}
+.unit-head h2{font-family:var(--serif);font-weight:600;font-size:28px;line-height:1.05;color:var(--pearl)}
+.unit-head p{font-size:14px;color:#b9a77f;margin-top:4px;line-height:1.35}
+.unit.locked .unit-head{opacity:.55}
+.lock-note{font-size:13px;color:#9c8b68;margin:14px 0 0 58px;font-style:italic}
+
+.nodes{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:18px}
+.node-wrap{display:flex;flex-direction:column;align-items:center;width:120px}
+.node-wrap:nth-child(1){transform:translateX(-58px)}
+.node-wrap:nth-child(2){transform:translateX(0)}
+.node-wrap:nth-child(3){transform:translateX(58px)}
+.node-wrap:nth-child(4){transform:translateX(0)}
+.node-wrap:nth-child(5){transform:translateX(-58px)}
+.node{
+  width:78px;height:78px;border-radius:50%;position:relative;display:grid;place-items:center;
+  background:radial-gradient(circle, var(--c) 0 36%, var(--black) 37% 41%, var(--gold) 42% 55%, var(--black) 56% 59%, #E3C062 60% 70%, var(--gold-lo) 71% 100%);
+  box-shadow:0 0 0 3px var(--black), 0 0 0 4px var(--gold-lo), 0 8px 18px rgba(0,0,0,.45);
+  transition:transform .15s;
+}
+.node:active{transform:scale(.94)}
+.node span{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--pearl);line-height:1;margin-top:-1px}
+.node[disabled]{filter:grayscale(1) brightness(.6);cursor:default}
+.node.done::after{
+  content:"";position:absolute;inset:-7px;border-radius:50%;
+  border:2px dotted var(--gold-hi);
+}
+.node-label{font-size:13px;margin-top:8px;color:var(--pearl2);text-align:center}
+.stars{font-size:12px;letter-spacing:2px;color:var(--gold-hi);height:14px;margin-top:2px}
+.stars .off{color:#4a3f2e}
+
+.foot{text-align:center;font-family:var(--serif);font-style:italic;color:#8d7c5a;font-size:16px;padding:10px 20px 40px}
+
+/* ---------- урок ---------- */
+.lesson{min-height:100vh;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;gap:14px;padding:16px 18px 10px}
+.x{width:36px;height:36px;font-size:26px;line-height:1;color:#b9a77f}
+.progress{flex:1;height:10px;background:#3a3125;border:1px solid #4b3f2c;position:relative;overflow:hidden}
+.progress i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--gold-lo),var(--gold),var(--gold-hi));transition:width .35s}
+.ex{flex:1;padding:10px 18px 150px}
+.prompt{font-size:15px;color:var(--gold);margin:6px 0 14px}
+.card{
+  background:var(--pearl);color:var(--ink);padding:20px 18px;border:1px solid var(--gold);
+  box-shadow:inset 0 0 0 4px var(--pearl),inset 0 0 0 5px rgba(201,162,58,.55);
+}
+.q{font-family:var(--serif);font-size:30px;font-weight:600;line-height:1.15}
+.q.small{font-size:24px}
+.q-sub{font-size:14px;color:#7b6a4a;margin-top:8px}
+.opts{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.opt{
+  text-align:left;background:var(--black2);border:1px solid #5a4b33;padding:14px 16px;font-size:17px;color:var(--pearl);
+  transition:background .12s,border-color .12s;
+}
+.opt.fr{font-family:var(--serif);font-size:21px;font-weight:600}
+.opt.sel{background:#4a3a1a;border-color:var(--gold-hi);box-shadow:inset 3px 0 0 var(--gold-hi)}
+.opt.right{background:#2f4423;border-color:#8fb36b}
+.opt.wrong{background:#4d2219;border-color:#d0735e}
+
+.audio{display:flex;gap:12px;align-items:center;justify-content:center;padding:6px 0 2px}
+.play{
+  width:84px;height:84px;border-radius:50%;font-size:30px;color:var(--black);
+  background:radial-gradient(circle at 35% 30%,var(--gold-hi),var(--gold) 55%,var(--gold-lo));
+  box-shadow:0 0 0 3px var(--black),0 0 0 5px var(--gold-lo);
+}
+.slow{
+  width:54px;height:54px;border-radius:50%;font-size:13px;background:var(--black);color:var(--gold-hi);
+  border:1px solid var(--gold);
+}
+.reveal{display:block;margin:12px auto 0;font-size:13px;color:#7b6a4a;text-decoration:underline}
+.revealed{font-family:var(--serif);font-size:22px;text-align:center;margin-top:10px;color:var(--ink)}
+
+.tiles-answer{
+  min-height:98px;margin-top:16px;padding:8px 0;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;
+  background:repeating-linear-gradient(transparent 0 44px, #5a4b33 44px 45px, transparent 45px 52px);
+}
+.bank{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;justify-content:center}
+.tile{
+  font-family:var(--serif);font-size:20px;font-weight:600;padding:7px 12px;background:var(--pearl);color:var(--ink);
+  border:1px solid var(--gold-lo);box-shadow:0 3px 0 var(--gold-lo);
+}
+.tile.used{visibility:hidden}
+.typer{
+  width:100%;margin-top:16px;padding:14px;font:600 20px var(--serif);background:var(--pearl);color:var(--ink);
+  border:1px solid var(--gold);
+}
+.switch{display:block;margin:14px auto 0;font-size:14px;color:var(--gold);text-decoration:underline}
+
+.match{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.match .opt{text-align:center;padding:14px 8px;font-size:16px}
+.match .opt.fr{font-size:19px}
+.match .opt.gone{opacity:0;pointer-events:none;transition:opacity .3s}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+details.passage{margin-bottom:16px}
+details.passage summary{cursor:pointer;font-size:14px;color:var(--gold);margin-bottom:8px}
+.passage .card{font-family:var(--serif);font-size:20px;line-height:1.5}
+.passage h3{font-size:24px;font-style:italic;margin-bottom:8px}
+
+.rule h3{font-family:var(--serif);font-size:28px;margin-bottom:10px}
+.rule p{font-size:16px;line-height:1.55}
+.rule ul{list-style:none;margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
+.rule li{font-family:var(--serif);font-size:20px;font-weight:600;border-bottom:1px dotted var(--gold-lo)}
+
+.bottom{
+  position:fixed;left:0;right:0;bottom:0;padding:14px 18px calc(16px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(transparent,var(--black) 30%);
+}
+.bottom-in{max-width:484px;margin:0 auto}
+.btn{
+  width:100%;padding:16px;font-size:17px;font-weight:600;color:var(--black);
+  background:linear-gradient(180deg,var(--gold-hi),var(--gold) 60%,#B08A2A);
+  border:1px solid var(--gold-lo);box-shadow:0 4px 0 var(--gold-lo);
+}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--gold-lo)}
+.btn[disabled]{filter:grayscale(1) brightness(.55);cursor:default}
+.btn.dark{background:var(--black);color:var(--gold-hi);border-color:var(--gold)}
+
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;transform:translateY(100%);transition:transform .25s ease-out;
+  padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));z-index:10;
+}
+.sheet.show{transform:none}
+.sheet.ok{background:var(--meadow);border-top:3px solid #8fb36b}
+.sheet.bad{background:#6E2A1E;border-top:3px solid #d0735e}
+.sheet-in{max-width:484px;margin:0 auto}
+.sheet h4{font-family:var(--serif);font-style:italic;font-size:30px;color:var(--gold-hi)}
+.sheet p{font-size:15px;margin:6px 0 14px;line-height:1.4}
+.sheet .fr-ans{font-family:var(--serif);font-size:21px;font-weight:600}
+
+/* ---------- итог ---------- */
+.result{min-height:100vh;display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 22px 140px}
+.medal{width:200px;height:200px;border-radius:50%;box-shadow:0 0 0 4px var(--black),0 0 0 6px var(--gold);margin-bottom:26px}
+.result h2{font-family:var(--serif);font-style:italic;font-size:42px;color:var(--gold-hi);line-height:1.05}
+.result .big-stars{font-size:34px;letter-spacing:6px;color:var(--gold-hi);margin:14px 0}
+.result .big-stars .off{color:#4a3f2e}
+.res-row{display:flex;gap:12px;margin-top:10px}
+.res-row .chip{flex-direction:column;gap:2px;padding:12px 18px;min-width:120px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ======================= ДАННЫЕ КУРСА A2 =======================
+   В каждом задании первый вариант ответа — правильный (порядок перемешивается при показе). */
+const UNITS = [
+{
+  title:"Ma journée", topic:"Распорядок дня и возвратные глаголы",
+  vocab:[["se réveiller","просыпаться"],["se lever","вставать"],["se doucher","принимать душ"],["le petit-déjeuner","завтрак"],["travailler","работать"],["le soir","вечер"],["d'habitude","обычно"],["se coucher","ложиться спать"],["tôt","рано"],["tard","поздно"]],
+  rule:{title:"Возвратные глаголы",
+    text:"Глаголы вроде se lever, se coucher, se doucher употребляются с местоимением перед глаголом. Перед гласной me, te, se превращаются в m', t', s'.",
+    ex:["je me lève","tu te lèves","il se lève","nous nous levons","vous vous levez","elles se lèvent"]},
+  grammar:[["Je ___ lève à sept heures.",["me","te","se"],"Я встаю в семь часов."],
+    ["Elle ___ couche tard.",["se","me","nous"],"Она ложится поздно."],
+    ["Nous ___ promenons au parc.",["nous","vous","se"],"Мы гуляем в парке."],
+    ["Tu ___ habilles vite.",["t'","s'","m'"],"Ты быстро одеваешься."],
+    ["Ils se ___ à huit heures.",["réveillent","réveille","réveillons"],"Они просыпаются в восемь."],
+    ["Vous vous ___ le matin ?",["douchez","douche","douchons"],"Вы принимаете душ утром?"]],
+  listen:[["Je me lève à sept heures.","Я встаю в семь часов."],
+    ["D'habitude, je prends un café le matin.","Обычно я пью кофе утром."],
+    ["Elle se couche très tard.","Она ложится очень поздно."],
+    ["Nous travaillons du lundi au vendredi.","Мы работаем с понедельника по пятницу."],
+    ["Le soir, je lis un livre.","Вечером я читаю книгу."]],
+  reading:{title:"La journée de Claire",
+    text:"Claire habite à Lyon. D'habitude, elle se réveille à sept heures. Elle prend une douche, puis elle boit un café avec un croissant. Elle travaille dans une librairie. Le soir, elle fait du yoga et elle se couche vers onze heures.",
+    q:[["Où habite Claire ?",["À Lyon","À Paris","À Nice"]],
+      ["À quelle heure se réveille-t-elle ?",["À sept heures","À huit heures","À onze heures"]],
+      ["Où travaille-t-elle ?",["Dans une librairie","Dans un café","Dans une école"]],
+      ["Que fait-elle le soir ?",["Du yoga","De la natation","Du piano"]]]},
+  write:[["Я встаю рано.","Je me lève tôt."],
+    ["Мы ложимся спать поздно.","Nous nous couchons tard."],
+    ["Обычно я ем дома.","D'habitude je mange à la maison."],
+    ["Ты принимаешь душ вечером?","Tu te douches le soir ?"],
+    ["Она работает утром.","Elle travaille le matin."]]
+},
+{
+  title:"Au café", topic:"Еда, кафе и частичный артикль",
+  vocab:[["l'eau","вода"],["le pain","хлеб"],["le fromage","сыр"],["la viande","мясо"],["les légumes","овощи"],["l'addition","счёт"],["un verre","бокал, стакан"],["commander","заказывать"],["délicieux","очень вкусный"],["le serveur","официант"]],
+  rule:{title:"Частичный артикль",
+    text:"Когда говорим о неопределённом количестве: du — мужской род, de la — женский, de l' — перед гласной, des — множественное число. После отрицания всегда de или d'.",
+    ex:["du pain","de la soupe","de l'eau","des légumes","pas de café","pas d'eau"]},
+  grammar:[["Je voudrais ___ eau, s'il vous plaît.",["de l'","du","de la"],"Я бы хотела воды, пожалуйста."],
+    ["Tu manges ___ fromage ?",["du","de la","des"],"Ты ешь сыр?"],
+    ["Elle achète ___ légumes.",["des","du","de la"],"Она покупает овощи."],
+    ["Je ne bois pas ___ café.",["de","du","le"],"Я не пью кофе."],
+    ["Nous prenons ___ soupe.",["de la","du","des"],"Мы берём суп."],
+    ["Il n'y a pas ___ pain.",["de","du","des"],"Хлеба нет."]],
+  listen:[["Je voudrais un café, s'il vous plaît.","Я бы хотела кофе, пожалуйста."],
+    ["L'addition, s'il vous plaît.","Счёт, пожалуйста."],
+    ["Vous avez une table pour deux ?","У вас есть столик на двоих?"],
+    ["Je ne mange pas de viande.","Я не ем мясо."],
+    ["Le pain est délicieux.","Хлеб очень вкусный."]],
+  reading:{title:"Au Petit Prince",
+    text:"Samedi, Lucas et Emma vont au café « Le Petit Prince ». Emma commande un thé et une tarte aux pommes. Lucas prend un chocolat chaud et un croque-monsieur. Le serveur est très sympathique. À la fin, Lucas paie l'addition : vingt euros.",
+    q:[["Comment s'appelle le café ?",["Le Petit Prince","Le Grand Café","La Belle Époque"]],
+      ["Qu'est-ce qu'Emma boit ?",["Un thé","Un café","Un chocolat chaud"]],
+      ["Comment est le serveur ?",["Sympathique","Fatigué","Désagréable"]],
+      ["Qui paie l'addition ?",["Lucas","Emma","Le serveur"]]]},
+  write:[["Я бы хотела воды.","Je voudrais de l'eau."],
+    ["Он не ест сыр.","Il ne mange pas de fromage."],
+    ["Счёт, пожалуйста.","L'addition s'il vous plaît."],
+    ["Мы заказываем суп.","Nous commandons de la soupe."],
+    ["Хлеб очень вкусный.","Le pain est délicieux."]]
+},
+{
+  title:"Le week-end dernier", topic:"Прошедшее время passé composé",
+  vocab:[["hier","вчера"],["le week-end dernier","в прошлые выходные"],["visiter","посещать"],["le musée","музей"],["le tableau","картина"],["aller","идти, ехать"],["faire","делать"],["danser","танцевать"],["une soirée","вечеринка"],["rentrer","возвращаться домой"]],
+  rule:{title:"Passé composé",
+    text:"Avoir или être в настоящем + причастие прошедшего времени. Большинство глаголов спрягаются с avoir. Глаголы движения (aller, venir, partir, rentrer…) — с être, и причастие согласуется с подлежащим.",
+    ex:["j'ai mangé","tu as vu","elle a fait","je suis allé(e)","elle est allée","ils sont rentrés"]},
+  grammar:[["Hier, j'___ regardé un film.",["ai","suis","as"],"Вчера я смотрела фильм."],
+    ["Elle est ___ au cinéma.",["allée","allé","aller"],"Она пошла в кино."],
+    ["Nous ___ visité le Louvre.",["avons","sommes","avez"],"Мы посетили Лувр."],
+    ["Tu as ___ tes devoirs ?",["fait","faire","faites"],"Ты сделала домашнее задание?"],
+    ["Ils sont ___ tard.",["rentrés","rentré","rentrer"],"Они вернулись поздно."],
+    ["J'ai ___ un beau tableau.",["vu","voir","vois"],"Я увидела красивую картину."]],
+  listen:[["Hier, j'ai visité un musée.","Вчера я посетила музей."],
+    ["Le week-end dernier, nous sommes allés à la mer.","В прошлые выходные мы ездили на море."],
+    ["Elle a dansé toute la nuit.","Она танцевала всю ночь."],
+    ["Tu as vu ce film ?","Ты видела этот фильм?"],
+    ["Ils sont rentrés à minuit.","Они вернулись в полночь."]],
+  reading:{title:"Sophie à Vienne",
+    text:"Le week-end dernier, Sophie est allée à Vienne. Samedi, elle a visité le musée du Belvédère et elle a vu « Le Baiser » de Gustav Klimt. Elle a adoré ! Le soir, elle a mangé une Sachertorte dans un café. Dimanche, elle est rentrée à Paris en train.",
+    q:[["Où est allée Sophie ?",["À Vienne","À Rome","À Berlin"]],
+      ["Quel tableau a-t-elle vu ?",["Le Baiser","La Joconde","Les Nymphéas"]],
+      ["Qu'est-ce qu'elle a mangé ?",["Une Sachertorte","Une pizza","Un croissant"]],
+      ["Comment est-elle rentrée ?",["En train","En avion","En voiture"]]]},
+  write:[["Вчера я смотрела фильм.","Hier j'ai regardé un film."],
+    ["Мы посетили музей.","Nous avons visité le musée."],
+    ["Она пошла в кино.","Elle est allée au cinéma."],
+    ["Ты видела картину?","Tu as vu le tableau ?"],
+    ["Они танцевали.","Ils ont dansé."]]
+},
+{
+  title:"En ville", topic:"Город, направления и futur proche",
+  vocab:[["la gare","вокзал"],["tout droit","прямо"],["à gauche","налево"],["à droite","направо"],["près de","рядом с"],["loin de","далеко от"],["le billet","билет"],["le métro","метро"],["la rue","улица"],["demain","завтра"]],
+  rule:{title:"Futur proche",
+    text:"Ближайшее будущее: глагол aller в настоящем времени + инфинитив. Так говорят о планах: «я собираюсь…», «завтра я…».",
+    ex:["je vais partir","tu vas voir","il va manger","nous allons visiter","vous allez prendre","ils vont arriver"]},
+  grammar:[["Demain, je ___ visiter Montmartre.",["vais","va","allons"],"Завтра я посещу Монмартр."],
+    ["Nous allons ___ le métro.",["prendre","pris","prenons"],"Мы поедем на метро."],
+    ["Elle ___ partir ce soir.",["va","vas","vont"],"Она уедет сегодня вечером."],
+    ["Ils ___ arriver à la gare.",["vont","va","allez"],"Они приедут на вокзал."],
+    ["La gare est près ___ l'hôtel.",["de","à","en"],"Вокзал рядом с отелем."],
+    ["Tournez ___ gauche.",["à","en","de"],"Поверните налево."]],
+  listen:[["Où est la gare, s'il vous plaît ?","Где вокзал, пожалуйста?"],
+    ["Allez tout droit, puis tournez à droite.","Идите прямо, потом поверните направо."],
+    ["Demain, je vais prendre le train.","Завтра я поеду на поезде."],
+    ["Le musée est près d'ici.","Музей рядом отсюда."],
+    ["Nous allons acheter des billets.","Мы купим билеты."]],
+  reading:{title:"Un message de Chloé",
+    text:"Bonjour Léa ! Demain, nous allons visiter Paris ensemble. Le matin, on va prendre le métro jusqu'à la tour Eiffel. Après, on va déjeuner dans un petit restaurant près de la Seine. L'après-midi, nous allons faire du shopping rue de Rivoli. Bisous, Chloé",
+    q:[["Quand vont-elles visiter Paris ?",["Demain","Aujourd'hui","Hier"]],
+      ["Comment vont-elles aller à la tour Eiffel ?",["En métro","À pied","En taxi"]],
+      ["Où vont-elles déjeuner ?",["Près de la Seine","À la gare","À l'hôtel"]],
+      ["Que vont-elles faire l'après-midi ?",["Du shopping","Du sport","Un pique-nique"]]]},
+  write:[["Завтра я посещу Париж.","Demain je vais visiter Paris."],
+    ["Поверните налево.","Tournez à gauche."],
+    ["Вокзал далеко.","La gare est loin."],
+    ["Мы поедем на метро.","Nous allons prendre le métro."],
+    ["Она купит билет.","Elle va acheter un billet."]]
+},
+{
+  title:"Souvenirs d'enfance", topic:"Воспоминания и imparfait",
+  vocab:[["souvent","часто"],["toujours","всегда"],["la campagne","деревня, природа"],["les grands-parents","бабушка и дедушка"],["jouer","играть"],["l'été","лето"],["chaque","каждый"],["avoir peur","бояться"],["le jardin","сад"],["heureux, heureuse","счастливый, счастливая"]],
+  rule:{title:"Imparfait",
+    text:"Для описаний и привычек в прошлом: «раньше я часто…», «было тепло». Основа — от формы nous в настоящем (nous jouons → jou-) плюс окончания. Исключение: être → j'étais.",
+    ex:["je jouais","tu jouais","il jouait","nous jouions","vous jouiez","ils jouaient"]},
+  grammar:[["Quand j'___ petite, j'aimais les chats.",["étais","été","suis"],"Когда я была маленькой, я любила кошек."],
+    ["Nous ___ souvent à la plage.",["allions","allons","irons"],"Мы часто ходили на пляж."],
+    ["Il ___ beau tous les jours.",["faisait","fera","fais"],"Каждый день была хорошая погода."],
+    ["Quand tu étais petit, tu ___ un chien ?",["avais","auras","as"],"Когда ты был маленьким, у тебя была собака?"],
+    ["Avant, mes grands-parents ___ à la campagne.",["habitaient","habiteront","habitons"],"Раньше бабушка с дедушкой жили в деревне."],
+    ["Chaque été, je ___ dans le jardin.",["jouais","jouerai","jouons"],"Каждое лето я играла в саду."]],
+  listen:[["Quand j'étais petite, j'habitais à la campagne.","Когда я была маленькой, я жила в деревне."],
+    ["Nous allions souvent chez mes grands-parents.","Мы часто ездили к бабушке с дедушкой."],
+    ["Il faisait toujours chaud en été.","Летом всегда было жарко."],
+    ["J'avais peur des chiens.","Я боялась собак."],
+    ["Chaque soir, ma mère lisait une histoire.","Каждый вечер мама читала сказку."]],
+  reading:{title:"Les étés de Manon",
+    text:"Quand Manon était petite, elle passait tous ses étés en Provence chez sa grand-mère. La maison avait un grand jardin avec des lavandes. Chaque matin, Manon allait au marché avec sa grand-mère. L'après-midi, elle dessinait des fleurs. Elle était très heureuse là-bas.",
+    q:[["Où Manon passait-elle ses étés ?",["En Provence","En Bretagne","En Alsace"]],
+      ["Qu'est-ce qu'il y avait dans le jardin ?",["Des lavandes","Des tomates","Des roses"]],
+      ["Où allait-elle chaque matin ?",["Au marché","À l'école","À la plage"]],
+      ["Que faisait-elle l'après-midi ?",["Elle dessinait","Elle nageait","Elle dormait"]]]},
+  write:[["Когда я была маленькой, я любила шоколад.","Quand j'étais petite j'aimais le chocolat."],
+    ["Мы часто играли в саду.","Nous jouions souvent dans le jardin."],
+    ["Было жарко.","Il faisait chaud."],
+    ["У неё была кошка.","Elle avait un chat."],
+    ["Я жила в деревне.","J'habitais à la campagne."]]
+},
+{
+  title:"Paris, mon amour", topic:"Сравнения и прилагательные",
+  vocab:[["plus … que","более … чем"],["moins … que","менее … чем"],["aussi … que","такой же … как"],["meilleur","лучше"],["belle","красивая"],["cher","дорогой"],["ancien","старинный"],["célèbre","знаменитый"],["le quartier","район"],["la vue","вид"]],
+  rule:{title:"Сравнение",
+    text:"Plus … que — больше, moins … que — меньше, aussi … que — так же. Bon превращается в meilleur (не «plus bon»). Beau → belle в женском роде, а перед гласной — bel: un bel hôtel.",
+    ex:["plus grand que","moins cher que","aussi beau que","meilleur que","une belle rue","un bel hôtel"]},
+  grammar:[["Paris est ___ grand que Lyon.",["plus","plus de","très"],"Париж больше Лиона."],
+    ["Ce croissant est ___ que l'autre.",["meilleur","plus bon","bien"],"Этот круассан лучше другого."],
+    ["Le métro est ___ cher que le taxi.",["moins","moins de","peu"],"Метро дешевле такси."],
+    ["Elle est aussi belle ___ sa sœur.",["que","comme","de"],"Она такая же красивая, как её сестра."],
+    ["C'est une ___ ville.",["belle","beau","bel"],"Это красивый город."],
+    ["C'est un ___ hôtel.",["bel","beau","belle"],"Это красивый отель."]],
+  listen:[["Paris est plus grand que Lyon.","Париж больше Лиона."],
+    ["La vue est magnifique !","Вид великолепный!"],
+    ["Ce quartier est moins cher.","Этот район дешевле."],
+    ["C'est le musée le plus célèbre de Paris.","Это самый знаменитый музей Парижа."],
+    ["Ton français est meilleur maintenant.","Твой французский теперь лучше."]],
+  reading:{title:"Montmartre",
+    text:"Montmartre est un quartier ancien et très célèbre. Il est plus calme que les Champs-Élysées, mais il y a beaucoup de touristes. Du Sacré-Cœur, la vue sur Paris est magnifique. Les cafés sont moins chers qu'au centre. Pour beaucoup d'artistes, c'est le plus beau quartier de Paris.",
+    q:[["Comment est Montmartre ?",["Ancien et célèbre","Moderne et calme","Nouveau et cher"]],
+      ["Montmartre est plus calme que…",["les Champs-Élysées","le Sacré-Cœur","la campagne"]],
+      ["D'où la vue est-elle magnifique ?",["Du Sacré-Cœur","De la tour Eiffel","Du Louvre"]],
+      ["Les cafés sont…",["moins chers qu'au centre","plus chers qu'au centre","toujours fermés"]]]},
+  write:[["Париж красивее Лондона.","Paris est plus beau que Londres."],
+    ["Это красивая улица.","C'est une belle rue."],
+    ["Метро дешевле такси.","Le métro est moins cher que le taxi."],
+    ["Твой французский лучше.","Ton français est meilleur."],
+    ["Вид великолепный.","La vue est magnifique."]]
+}];
+
+const SKILLS = [
+  {id:"vocab",  fr:"Vocabulaire", glyph:"❦", c:"var(--poppy)"},
+  {id:"grammar",fr:"Grammaire",   glyph:"§", c:"var(--cornflower)"},
+  {id:"listen", fr:"Écoute",      glyph:"♪", c:"var(--violet)"},
+  {id:"read",   fr:"Lecture",     glyph:"❧", c:"var(--meadow)"},
+  {id:"write",  fr:"Écriture",    glyph:"✒", c:"var(--rose)"}
+];
+const CHEERS = ["Bravo, ma Diva !","Magnifique !","Tu es une star !","Parfait !","Très chic !","Incroyable !","Quelle Diva !"];
+const DAILY_GOAL = 30;
+
+/* ======================= ВСПОМОГАТЕЛЬНОЕ ======================= */
+const tg = window.Telegram && window.Telegram.WebApp;
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fr = s => esc(s).replace(/'/g, "’");                       // красивый апостроф
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = (a, n) => shuffle(a).slice(0, n);
+const norm = s => s.toLowerCase().replace(/’/g, "'").replace(/[.,!?;:«»…"]/g, " ").replace(/\s+/g, " ").trim();
+const noAccents = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const tokens = s => s.replace(/[.,!?;:«»]/g, " ").split(/\s+/).filter(Boolean);
+const todayStr = (off = 0) => { const d = new Date(); d.setDate(d.getDate() + off); return d.toLocaleDateString("en-CA"); };
+function haptic(type){ try{ if(!tg || !tg.HapticFeedback) return; if(type === "tap") tg.HapticFeedback.impactOccurred("light"); else tg.HapticFeedback.notificationOccurred(type); }catch(e){} }
+function mulberry(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+/* Мозаика в духе «Поцелуя»: прямоугольники (его плащ), спирали и круги-цветы (её платье) */
+function mosaic(seed, w = 400, h = 240, density = 1){
+  const r = mulberry(seed); let s = `<svg class="mosaic" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">`;
+  const spiral = (cx, cy, size) => { let d = `M${cx} ${cy}`; for (let t = 0; t < Math.PI * 6; t += .25) { const rr = size * t / (Math.PI * 6); d += ` L${(cx + rr * Math.cos(t)).toFixed(1)} ${(cy + rr * Math.sin(t)).toFixed(1)}`; } return `<path d="${d}" fill="none" stroke="#6b4e10" stroke-width="1.3" opacity=".7"/>`; };
+  for (let i = 0; i < 9 * density; i++) s += spiral(r() * w, r() * h, 10 + r() * 16);
+  for (let i = 0; i < 22 * density; i++) {
+    const x = w * .45 + r() * w * .6, y = r() * h, rw = 7 + r() * 16, rh = 16 + r() * 34;
+    const col = ["#1B1610", "#F3E9D2", "#9a958c", "#1B1610"][Math.floor(r() * 4)];
+    s += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${rw.toFixed(1)}" height="${rh.toFixed(1)}" fill="${col}" opacity=".9"/>`;
+    s += `<rect x="${(x + rw * .3).toFixed(1)}" y="${(y + rh * .2).toFixed(1)}" width="${(rw * .4).toFixed(1)}" height="${(rh * .25).toFixed(1)}" fill="${col === "#1B1610" ? "#C9A23A" : "#1B1610"}"/>`;
+  }
+  const petals = ["#B8412E", "#3B5BA5", "#6B4C8A", "#B15C7A", "#F3E9D2"];
+  for (let i = 0; i < 14 * density; i++) {
+    const cx = r() * w * .7, cy = r() * h, rad = 6 + r() * 12, col = petals[Math.floor(r() * petals.length)];
+    s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${rad.toFixed(1)}" fill="${col}" opacity=".88"/><circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${(rad * .62).toFixed(1)}" fill="none" stroke="#E3C062" stroke-width="1.5"/><circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${(rad * .22).toFixed(1)}" fill="#1B1610"/>`;
+  }
+  for (let i = 0; i < 40 * density; i++) s += `<circle cx="${(r() * w).toFixed(1)}" cy="${(r() * h).toFixed(1)}" r="${(1 + r() * 2).toFixed(1)}" fill="#7A5A12" opacity=".6"/>`;
+  return s + "</svg>";
+}
+
+/* ======================= ПРОГРЕСС ======================= */
+const KEY = "diva_state_v1";
+let S = {xp:0, done:{}, streak:0, last:null, days:{}};
+const useCloud = () => tg && tg.CloudStorage && tg.initData;
+function loadState(){
+  return new Promise(res => {
+    const local = () => { try { const v = localStorage.getItem(KEY); return v ? JSON.parse(v) : null; } catch(e) { return null; } };
+    if (useCloud()) {
+      try { tg.CloudStorage.getItem(KEY, (err, val) => { if (!err && val) { try { return res(JSON.parse(val)); } catch(e){} } res(local()); }); }
+      catch(e) { res(local()); }
+    } else res(local());
+  });
+}
+function save(){
+  const keep = {}; Object.keys(S.days).sort().slice(-14).forEach(k => keep[k] = S.days[k]); S.days = keep;
+  const v = JSON.stringify(S);
+  try { localStorage.setItem(KEY, v); } catch(e) {}
+  if (useCloud()) { try { tg.CloudStorage.setItem(KEY, v, () => {}); } catch(e) {} }
+}
+function liveStreak(){ return (S.last === todayStr() || S.last === todayStr(-1)) ? S.streak : 0; }
+function unitUnlocked(i){ if (i === 0) return true; return SKILLS.filter(sk => S.done[`${i - 1}-${sk.id}`]).length >= 3; }
+
+/* ======================= ГЛАВНЫЙ ЭКРАН ======================= */
+function showHome(){
+  if (tg && tg.BackButton) tg.BackButton.hide();
+  const todayXp = S.days[todayStr()] || 0, pct = Math.min(100, Math.round(todayXp / DAILY_GOAL * 100));
+  let html = `<header class="hero leaf">${mosaic(7)}
+    <div class="plaque"><h1>Diva Française</h1><p>Французский, уровень A2</p></div>
+    <div class="stats">
+      <div class="chip">🔥 <b>${liveStreak()}</b> дн. подряд</div>
+      <div class="chip">✦ <b>${S.xp}</b> XP</div>
+      <div class="chip goal">Сегодня <div class="bar"><i style="width:${pct}%"></i></div> ${todayXp}/${DAILY_GOAL}</div>
+    </div></header><main class="path">`;
+  UNITS.forEach((u, i) => {
+    const open = unitUnlocked(i);
+    html += `<section class="unit ${open ? "" : "locked"}">
+      <div class="unit-head"><div class="unit-num leaf">${i + 1}</div><div><h2>${fr(u.title)}</h2><p>${esc(u.topic)}</p></div></div>`;
+    if (!open) html += `<p class="lock-note">Откроется, когда пройдёшь 3 урока в разделе ${i}</p>`;
+    html += `<div class="nodes">`;
+    SKILLS.forEach(sk => {
+      const st = S.done[`${i}-${sk.id}`] || 0;
+      const stars = st ? `${"★".repeat(st)}<span class="off">${"★".repeat(3 - st)}</span>` : "";
+      html += `<div class="node-wrap"><button class="node ${st ? "done" : ""}" style="--c:${sk.c}" ${open ? "" : "disabled"} data-u="${i}" data-s="${sk.id}" aria-label="${sk.fr}"><span>${sk.glyph}</span></button>
+        <div class="node-label">${sk.fr}</div><div class="stars">${stars}</div></div>`;
+    });
+    html += `</div></section>`;
+  });
+  html += `</main><p class="foot">Un peu chaque jour, ma Diva</p>`;
+  app.innerHTML = html;
+  app.querySelectorAll(".node:not([disabled])").forEach(b => b.onclick = () => { haptic("tap"); startLesson(+b.dataset.u, b.dataset.s); });
+  window.scrollTo(0, 0);
+}
+
+/* ======================= СБОРКА УРОКОВ ======================= */
+const BUILD = {
+  vocab(u){
+    const w = shuffle(u.vocab), ex = [];
+    w.slice(0, 3).forEach(([f, r]) => ex.push(mc("Что это значит?", f, r, u.vocab.filter(x => x[1] !== r).map(x => x[1]), {speak:f, frQ:true})));
+    w.slice(3, 6).forEach(([f, r]) => ex.push(mc("Как это по-французски?", r, f, u.vocab.filter(x => x[0] !== f).map(x => x[0]), {frOpts:true})));
+    ex.push({type:"match", prompt:"Собери пары", pairs:pick(u.vocab, 5)});
+    w.slice(6, 9).forEach(([f, r]) => ex.push(mc("Что это значит?", f, r, u.vocab.filter(x => x[1] !== r).map(x => x[1]), {speak:f, frQ:true})));
+    return ex;
+  },
+  grammar(u){
+    return [{type:"rule", rule:u.rule}].concat(shuffle(u.grammar).map(([q, opts, tr]) =>
+      ({type:"mc", prompt:"Вставь пропущенное", q, qSub:tr, frQ:true, frOpts:true, answer:opts[0], opts:shuffle(opts), speakAfter:q.replace("___", opts[0]).replace("' ", "'")})));
+  },
+  listen(u){
+    const all = u.listen.map(x => x[0]);
+    return shuffle(u.listen).map(([f, r], i) => {
+      if (i % 3 === 0) return {type:"mc", prompt:"Послушай и выбери, что прозвучало", listen:f, frOpts:true, answer:f, opts:shuffle([f, ...pick(all.filter(x => x !== f), 2)])};
+      if (i % 3 === 1) return tilesEx("Собери фразу, которую слышишь", null, f, u.listen.map(x => x[0]), {listen:f});
+      return {type:"mc", prompt:"Послушай и выбери перевод", listen:f, answer:r, opts:shuffle([r, ...pick(u.listen.map(x => x[1]).filter(x => x !== r), 2)])};
+    });
+  },
+  read(u){
+    return u.reading.q.map(([q, opts]) => ({type:"mc", prompt:"Прочитай текст и ответь", passage:u.reading, q, frQ:true, frOpts:true, answer:opts[0], opts:shuffle(opts), small:true}));
+  },
+  write(u){
+    return shuffle(u.write).map(([r, f]) => tilesEx("Переведи на французский", r, f, u.write.map(x => x[1]), {}));
+  }
+};
+function mc(prompt, q, answer, pool, o){ return Object.assign({type:"mc", prompt, q, answer, opts:shuffle([answer, ...pick(pool, 3)])}, o); }
+function tilesEx(prompt, q, answer, pool, o){
+  const own = tokens(answer), lower = own.map(t => t.toLowerCase());
+  const extra = shuffle([...new Set(pool.filter(p => p !== answer).flatMap(tokens))].filter(t => !lower.includes(t.toLowerCase()))).slice(0, 3);
+  return Object.assign({type:"tiles", prompt, q, answer, bank:shuffle([...own, ...extra])}, o);
+}
+
+/* ======================= УРОК ======================= */
+let L = null;
+function startLesson(ui, skill){
+  const items = BUILD[skill](UNITS[ui]);
+  L = {ui, skill, queue:items, pos:0, graded:items.filter(e => e.type !== "rule").length, resolved:0, firstOk:0};
+  if (tg && tg.BackButton) { tg.BackButton.show(); tg.BackButton.onClick(confirmExit); }
+  showExercise();
+}
+function confirmExit(){
+  const go = () => { if (tg && tg.BackButton) tg.BackButton.offClick(confirmExit); stopSpeech(); L = null; showHome(); };
+  if (tg && tg.showConfirm && tg.initData) tg.showConfirm("Выйти из урока? Прогресс этого урока не сохранится.", ok => ok && go());
+  else if (confirm("Выйти из урока? Прогресс этого урока не сохранится.")) go();
+}
+
+let current = null;   // {ex, getAnswer, ready}
+function showExercise(){
+  const ex = L.queue[L.pos];
+  const pct = Math.round(L.resolved / L.graded * 100);
+  let body = "";
+  const audioBlock = text => hasTTS
+    ? `<div class="audio"><button class="play" data-say="${esc(text)}" aria-label="Послушать">♪</button><button class="slow" data-say="${esc(text)}" data-slow="1" aria-label="Медленно">медл.</button></div>
+       <button class="reveal" data-reveal>Не могу слушать сейчас</button><div class="revealed" hidden>${fr(text)}</div>`
+    : `<p class="q-sub">Звук на этом устройстве недоступен — прочитай фразу:</p><div class="revealed">${fr(text)}</div>`;
+
+  if (ex.type === "rule") {
+    body = `<p class="prompt">Новое правило</p><div class="card rule"><h3>${esc(ex.rule.title)}</h3><p>${esc(ex.rule.text)}</p>
+      <ul>${ex.rule.ex.map(e => `<li>${fr(e)}</li>`).join("")}</ul></div>`;
+  } else if (ex.type === "mc") {
+    if (ex.passage) body += `<details class="passage" open><summary>Текст</summary><div class="card"><h3>${fr(ex.passage.title)}</h3>${fr(ex.passage.text)}</div></details>`;
+    body += `<p class="prompt">${esc(ex.prompt)}</p>`;
+    if (ex.listen) body += `<div class="card">${audioBlock(ex.listen)}</div>`;
+    else body += `<div class="card"><div class="q ${ex.small ? "small" : ""}">${ex.frQ ? fr(ex.q) : esc(ex.q)}</div>${ex.qSub ? `<p class="q-sub">${esc(ex.qSub)}</p>` : ""}
+      ${ex.speak && hasTTS ? `<button class="reveal" data-say="${esc(ex.speak)}" style="margin:10px 0 0">♪ послушать</button>` : ""}</div>`;
+    body += `<div class="opts">${ex.opts.map((o, i) => `<button class="opt ${ex.frOpts ? "fr" : ""}" data-i="${i}">${ex.frOpts ? fr(o) : esc(o)}</button>`).join("")}</div>`;
+  } else if (ex.type === "tiles") {
+    body += `<p class="prompt">${esc(ex.prompt)}</p>`;
+    body += ex.listen ? `<div class="card">${audioBlock(ex.listen)}</div>` : `<div class="card"><div class="q small">${esc(ex.q)}</div></div>`;
+    body += `<div class="tiles-answer" aria-label="Твой ответ"></div><div class="bank">${ex.bank.map((t, i) => `<button class="tile" data-t="${i}">${fr(t)}</button>`).join("")}</div>
+      <input class="typer" hidden autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Напиши по-французски">
+      <button class="switch" data-switch>Написать с клавиатуры</button>`;
+  } else if (ex.type === "match") {
+    const left = shuffle(ex.pairs.map((p, i) => ({t:p[0], i}))), right = shuffle(ex.pairs.map((p, i) => ({t:p[1], i})));
+    body = `<p class="prompt">${esc(ex.prompt)}</p><div class="match">${left.map((x, k) => `<button class="opt fr" data-side="l" data-i="${x.i}" style="grid-column:1;grid-row:${k + 1}">${fr(x.t)}</button>`).join("")}
+      ${right.map((x, k) => `<button class="opt" data-side="r" data-i="${x.i}" style="grid-column:2;grid-row:${k + 1}">${esc(x.t)}</button>`).join("")}</div>`;
+  }
+
+  app.innerHTML = `<div class="lesson"><div class="topbar"><button class="x" aria-label="Выйти">×</button><div class="progress"><i style="width:${pct}%"></i></div></div>
+    <div class="ex">${body}</div>
+    <div class="bottom"><div class="bottom-in"><button class="btn" id="check">${ex.type === "rule" ? "Понятно" : "Проверить"}</button></div></div>
+    <div class="sheet" id="sheet"><div class="sheet-in"></div></div></div>`;
+  window.scrollTo(0, 0);
+  app.querySelector(".x").onclick = confirmExit;
+  app.querySelectorAll("[data-say]").forEach(b => b.onclick = () => speak(b.dataset.say, !!b.dataset.slow));
+  const rv = app.querySelector("[data-reveal]");
+  if (rv) rv.onclick = () => { rv.hidden = true; app.querySelector(".revealed").hidden = false; };
+  if (ex.listen) setTimeout(() => speak(ex.listen), 350);
+
+  const check = app.querySelector("#check");
+  if (ex.type === "rule") { check.onclick = () => next(); return; }
+  check.disabled = true;
+
+  if (ex.type === "mc") {
+    let sel = null;
+    app.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+      if (current.locked) return;
+      app.querySelectorAll(".opt").forEach(x => x.classList.remove("sel")); b.classList.add("sel"); sel = +b.dataset.i; check.disabled = false; haptic("tap");
+    });
+    current = {ex, locked:false, grade(){
+      const ok = ex.opts[sel] === ex.answer;
+      app.querySelectorAll(".opt").forEach(b => { const v = ex.opts[+b.dataset.i]; if (v === ex.answer) b.classList.add("right"); else if (+b.dataset.i === sel) b.classList.add("wrong"); });
+      return {ok, show:ex.answer, fr:!!ex.frOpts};
+    }};
+  }
+
+  if (ex.type === "tiles") {
+    const ansBox = app.querySelector(".tiles-answer"), typer = app.querySelector(".typer"), sw = app.querySelector("[data-switch]");
+    let chosen = [], typing = false;
+    const refresh = () => { check.disabled = typing ? !typer.value.trim() : chosen.length === 0; };
+    app.querySelectorAll(".bank .tile").forEach(b => b.onclick = () => {
+      if (current.locked) return;
+      b.classList.add("used"); haptic("tap");
+      const t = document.createElement("button"); t.className = "tile"; t.innerHTML = b.innerHTML; t.dataset.t = b.dataset.t;
+      t.onclick = () => { if (current.locked) return; chosen = chosen.filter(x => x !== +t.dataset.t); t.remove(); b.classList.remove("used"); refresh(); };
+      ansBox.appendChild(t); chosen.push(+b.dataset.t); refresh();
+    });
+    sw.onclick = () => {
+      typing = !typing;
+      ansBox.hidden = typing; app.querySelector(".bank").hidden = typing; typer.hidden = !typing;
+      sw.textContent = typing ? "Собрать из слов" : "Написать с клавиатуры";
+      if (typing) typer.focus(); refresh();
+    };
+    typer.oninput = refresh;
+    typer.onkeydown = e => { if (e.key === "Enter" && !check.disabled) check.click(); };
+    current = {ex, locked:false, grade(){
+      const given = typing ? typer.value : chosen.map(i => ex.bank[i]).join(" ");
+      const a = norm(ex.answer), g = norm(given);
+      if (a === g) return {ok:true, show:ex.answer, fr:true};
+      if (noAccents(a) === noAccents(g)) return {ok:true, almost:true, show:ex.answer, fr:true};
+      return {ok:false, show:ex.answer, fr:true};
+    }};
+  }
+
+  if (ex.type === "match") {
+    let pickL = null, pickR = null, mistakes = 0, left = ex.pairs.length;
+    check.hidden = true; current = {ex, locked:false};
+    const tryPair = () => {
+      if (!pickL || !pickR) return;
+      const a = pickL, b = pickR; pickL = pickR = null;
+      if (a.dataset.i === b.dataset.i) {
+        haptic("tap"); [a, b].forEach(x => { x.classList.remove("sel"); x.classList.add("right"); setTimeout(() => x.classList.add("gone"), 250); });
+        if (--left === 0) setTimeout(() => feedback({ok:mistakes === 0, matchDone:true, mistakes}), 450);
+      } else {
+        mistakes++; haptic("error");
+        [a, b].forEach(x => { x.classList.remove("sel"); x.classList.add("wrong", "shake"); setTimeout(() => x.classList.remove("wrong", "shake"), 400); });
+      }
+    };
+    app.querySelectorAll(".match .opt").forEach(b => b.onclick = () => {
+      const side = b.dataset.side;
+      app.querySelectorAll(`.match .opt[data-side="${side}"]`).forEach(x => x.classList.remove("sel"));
+      b.classList.add("sel");
+      if (side === "l") { pickL = b; if (b.textContent) speak(ex.pairs[+b.dataset.i][0]); } else pickR = b;
+      tryPair();
+    });
+    return;
+  }
+
+  check.onclick = () => { if (current.locked) return; current.locked = true; feedback(current.grade()); };
+}
+
+function feedback(res){
+  const ex = L.queue[L.pos];
+  const sheet = app.querySelector("#sheet"), inner = sheet.querySelector(".sheet-in");
+  if (res.ok) {
+    haptic("success");
+    if (!ex.retry) L.firstOk++;
+    L.resolved++;
+    const extra = res.almost ? `<p>Почти идеально! Проверь акценты:<br><span class="fr-ans">${fr(res.show)}</span></p>` : (res.matchDone && res.mistakes ? `<p>Ошибок по пути: ${res.mistakes}. В следующий раз получится чище.</p>` : `<p>${ex.qSub ? esc(ex.qSub) : "Всё верно."}</p>`);
+    inner.innerHTML = `<h4>${CHEERS[Math.floor(Math.random() * CHEERS.length)]}</h4>${extra}<button class="btn dark" id="cont">Дальше</button>`;
+    sheet.className = "sheet ok";
+    if (ex.speakAfter) speak(ex.speakAfter);
+  } else {
+    haptic("error");
+    if (res.matchDone) { L.resolved++; }
+    else if (!ex.retry) { L.queue.push(Object.assign({}, ex, {retry:true, opts:ex.opts ? shuffle(ex.opts) : ex.opts, bank:ex.bank ? shuffle(ex.bank) : ex.bank})); }
+    else L.resolved++;
+    const ans = res.matchDone ? `<p>Пар с ошибкой: ${res.mistakes}. Это задание засчитано без звёздочки.</p>`
+      : `<p>Правильный ответ:<br><span class="${res.fr ? "fr-ans" : ""}">${res.fr ? fr(res.show) : esc(res.show)}</span></p>${!ex.retry ? "<p>Это задание вернётся в конце урока.</p>" : ""}`;
+    inner.innerHTML = `<h4>Pas tout à fait…</h4>${ans}<button class="btn dark" id="cont">Дальше</button>`;
+    sheet.className = "sheet bad";
+  }
+  requestAnimationFrame(() => sheet.classList.add("show"));
+  const bottom = app.querySelector(".bottom"); if (bottom) bottom.hidden = true;
+  inner.querySelector("#cont").onclick = next;
+}
+
+function next(){
+  stopSpeech();
+  L.pos++;
+  if (L.pos < L.queue.length) showExercise(); else finish();
+}
+
+function finish(){
+  if (tg && tg.BackButton) { tg.BackButton.offClick(confirmExit); tg.BackButton.hide(); }
+  const acc = L.firstOk / L.graded;
+  const stars = acc >= .9 ? 3 : acc >= .7 ? 2 : 1;
+  const xp = 10 + stars * 5;
+  const key = `${L.ui}-${L.skill}`;
+  S.done[key] = Math.max(S.done[key] || 0, stars);
+  S.xp += xp;
+  S.days[todayStr()] = (S.days[todayStr()] || 0) + xp;
+  if (S.last !== todayStr()) { S.streak = S.last === todayStr(-1) ? S.streak + 1 : 1; S.last = todayStr(); }
+  save(); haptic("success");
+  const titles = {3:"Magnifique, ma Diva !", 2:"Très bien !", 1:"C'est un début !"};
+  app.innerHTML = `<div class="result"><div class="medal leaf">${mosaic(Math.floor(Math.random() * 999), 200, 200, .9)}</div>
+    <h2>${fr(titles[stars])}</h2>
+    <div class="big-stars">${"★".repeat(stars)}<span class="off">${"★".repeat(3 - stars)}</span></div>
+    <div class="res-row"><div class="chip"><b>+${xp}</b> XP</div><div class="chip"><b>${Math.round(acc * 100)}%</b> с первого раза</div></div>
+    <div class="res-row"><div class="chip">🔥 <b>${liveStreak()}</b> дн. подряд</div></div></div>
+    <div class="bottom"><div class="bottom-in"><button class="btn" id="home">К урокам</button></div></div>`;
+  app.querySelector("#home").onclick = () => { L = null; showHome(); };
+  window.scrollTo(0, 0);
+}
+
+/* ======================= ОЗВУЧКА ======================= */
+const hasTTS = "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
+let frVoice = null;
+function pickVoice(){ try { const v = speechSynthesis.getVoices(); frVoice = v.find(x => /^fr[-_]FR/i.test(x.lang)) || v.find(x => /^fr/i.test(x.lang)) || null; } catch(e) {} }
+if (hasTTS) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(text, slow){
+  if (!hasTTS) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text.replace(/___/g, "")); u.lang = "fr-FR"; if (frVoice) u.voice = frVoice; u.rate = slow ? .6 : .9; speechSynthesis.speak(u); } catch(e) {}
+}
+function stopSpeech(){ if (hasTTS) try { speechSynthesis.cancel(); } catch(e) {} }
+
+/* ======================= СТАРТ ======================= */
+(async function init(){
+  if (tg) { try { tg.ready(); tg.expand(); tg.setHeaderColor("#1B1610"); tg.setBackgroundColor("#1B1610"); } catch(e) {} }
+  const saved = await loadState();
+  if (saved) S = Object.assign(S, saved);
+  showHome();
+})();
+</script>
+</body>
+</html>
